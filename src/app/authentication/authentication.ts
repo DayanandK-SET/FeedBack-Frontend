@@ -27,7 +27,8 @@ export class Authentication {
   isRegisterLoading: boolean = false;
 
   private apiAuthService: APIAuthenactionService = inject(APIAuthenactionService);
-  private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private cd: ChangeDetectorRef = inject(ChangeDetectorRef); // to refresh UI Manually
+  private router = inject(Router);
 
   constructor(){
     this.loginModel = new LoginModel();
@@ -39,7 +40,7 @@ export class Authentication {
     this.isLoginLoading = true;
 
     this.apiAuthService.apiLogin(this.loginModel)
-    .pipe(
+    .pipe(    // finalize() runs after the observable completes or errors.
       finalize(() => {
         this.isLoginLoading = false;
         this.cd.detectChanges();
@@ -49,7 +50,9 @@ export class Authentication {
       next:(response:any)=>{
         if(response){
           sessionStorage.setItem('token',response?.token);
-          alert('Login Successful')
+          alert('Login Successful');
+          this.router.navigateByUrl('/dashboard');
+
         }
       },
       error:(error)=>{
@@ -79,6 +82,7 @@ export class Authentication {
         if(response){
           sessionStorage.setItem('token',response?.token);
           alert('Register successful!');
+          this.router.navigateByUrl('')
         }
       },
       error:(error)=>{

@@ -18,7 +18,13 @@ export class APIAuthenactionService {
     apiRegister(registerModel: RegisterModel){
     return this.http.post(
         'http://localhost:5215/api/Authentication/Register',
-        registerModel
-    );
+        registerModel);
+    }
+
+    getMySurveys(){
+  return this.http.get<any[]>(
+    'http://localhost:5215/api/Survey/my-surveys'
+  );
 }
+
 }
