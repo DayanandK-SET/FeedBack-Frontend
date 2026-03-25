@@ -83,6 +83,14 @@ export class AdminService {
     return this.http.delete<string>(`${this.baseUrl}/creator/${id}`);
   }
 
+    // ✅ REPLACED deleteCreator — now toggles active/inactive
+  toggleCreatorStatus(id: number) {
+    return this.http.patch(
+      `${this.baseUrl}/creator/${id}/toggle-status`,
+      {}
+    );
+  }
+
   // api/Admin/audit-logs
   getAuditLogs() {
     return this.http.get<AuditLogDto[]>(`${this.baseUrl}/audit-logs`);

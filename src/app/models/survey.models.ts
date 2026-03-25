@@ -152,6 +152,8 @@ export interface CreateSurveyDto {
 export interface UpdateSurveyDto {
   title: string;
   description: string;
+    expireAt?: string | null;
+    maxResponses?: number | null;
 }
 
 //  Survey List (my-surveys) 
@@ -165,6 +167,8 @@ export interface CreatorSurveyListDto {
   totalResponses: number;
   publicIdentifier: string;
   isLocked: boolean;
+    expireAt?: string | null;
+      maxResponses?: number | null;
 }
 
 //  My Surveys - POST filter request 

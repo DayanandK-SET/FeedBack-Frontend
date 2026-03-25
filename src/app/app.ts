@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Authentication } from './authentication/authentication';
 

@@ -72,11 +72,14 @@
 
     </div>
 
+    <!-- ✅ FIX: filter tags now only appear after Apply is clicked
+         They are bound to appliedFromDate/appliedToDate/appliedIsActiveFilter
+         which only update inside applyFilters(), not on dropdown change -->
     <div class="filter-summary" *ngIf="hasActiveFilters">
-      <span class="filter-tag" *ngIf="fromDate">From: {{ fromDate }}</span>
-      <span class="filter-tag" *ngIf="toDate">To: {{ toDate }}</span>
-      <span class="filter-tag" *ngIf="isActiveFilter === true">Active Only</span>
-      <span class="filter-tag" *ngIf="isActiveFilter === false">Inactive Only</span>
+      <span class="filter-tag" *ngIf="appliedFromDate">From: {{ appliedFromDate }}</span>
+      <span class="filter-tag" *ngIf="appliedToDate">To: {{ appliedToDate }}</span>
+      <span class="filter-tag" *ngIf="appliedIsActiveFilter === true">Active Only</span>
+      <span class="filter-tag" *ngIf="appliedIsActiveFilter === false">Inactive Only</span>
     </div>
 
   </div>
@@ -138,19 +141,16 @@
               </td>
 
               <td>
-                <!-- ✅ LOCKED survey — show lock badge, no toggle -->
+                <!-- Locked survey — show lock badge, no toggle -->
                 <div class="toggle-wrapper" *ngIf="survey.isLocked">
-                  <span class="locked-badge" title="This survey is locked — expired or reached max responses">
-                    🔒 locked
+                  <span class="locked-badge" title="Expired or reached max responses">
+                    🔒 Locked
                   </span>
                 </div>
 
-                <!-- Normal survey — show toggle as before -->
+                <!-- Normal survey — show toggle -->
                 <div class="toggle-wrapper" *ngIf="!survey.isLocked">
-                  <label
-                    class="toggle-switch"
-                    [title]="survey.isActive ? 'Click to deactivate' : 'Click to activate'"
-                  >
+                  <label class="toggle-switch" [title]="survey.isActive ? 'Click to deactivate' : 'Click to activate'">
                     <input
                       type="checkbox"
                       [checked]="survey.isActive"
@@ -255,7 +255,7 @@
 
 
 <!-- ══════════════════════════════════════════════ -->
-<!-- EDIT MODAL                                     -->
+<!-- EDIT MODAL  ✅ UPDATED                        -->
 <!-- ══════════════════════════════════════════════ -->
 <div class="modal-backdrop" *ngIf="showEditModal()" (click)="closeEditModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
@@ -263,14 +263,43 @@
       <h3>✏️ Edit Survey</h3>
     </div>
     <div class="modal-body-custom">
+
+      <!-- Title -->
       <div class="form-group">
-        <label>Title</label>
+        <label>Title <span class="required">*</span></label>
         <input type="text" class="form-input" [(ngModel)]="editForm.title" placeholder="Survey title">
       </div>
+
+      <!-- Description -->
       <div class="form-group">
         <label>Description</label>
         <textarea class="form-input" rows="3" [(ngModel)]="editForm.description" placeholder="Survey description"></textarea>
       </div>
+
+      <!-- Expiry Date ✅ NEW -->
+      <div class="form-group">
+        <label>Expiry Date <span class="hint">(optional)</span></label>
+        <input
+          type="datetime-local"
+          class="form-input"
+          [(ngModel)]="editForm.expireAt"
+        >
+        <p class="field-hint">Clear this field to remove the expiry date</p>
+      </div>
+
+      <!-- Max Responses ✅ NEW -->
+      <div class="form-group">
+        <label>Max Responses <span class="hint">(optional)</span></label>
+        <input
+          type="number"
+          class="form-input"
+          [(ngModel)]="editForm.maxResponses"
+          placeholder="e.g. 100"
+          min="1"
+        >
+        <p class="field-hint">Clear this field to remove the response limit</p>
+      </div>
+
       <div class="text-danger small mt-1" *ngIf="editError()">{{ editError() }}</div>
     </div>
     <div class="modal-footer-custom">
@@ -339,6 +368,15 @@
 
       <div class="form-group">
         <label>Excel File <span class="required">*</span></label>
+
+        <!-- ✅ Download Template button -->
+        <div class="template-download-row">
+          <span class="template-hint">Don't have a template?</span>
+          <button class="btn-template" type="button" (click)="downloadExcelTemplate()">
+            📄 Download Template
+          </button>
+        </div>
+
         <label class="file-upload-area">
           <input type="file" accept=".xlsx" (change)="onFileSelected($event)" style="display: none">
           <div class="file-upload-inner">
@@ -347,6 +385,7 @@
             <span class="file-name" *ngIf="importFileName">{{ importFileName }}</span>
           </div>
         </label>
+
         <p class="field-hint">
           Excel columns: <strong>Column A</strong> — Question Text,
           <strong>Column B</strong> — Type (Text / Rating / MultipleChoice),

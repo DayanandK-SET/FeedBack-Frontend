@@ -1,11 +1,12 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LoginModel } from './Models/LoginModel';
 import { RegisterModel } from './Models/RegisterModel';
 import { APIAuthenactionService } from '../Services/api.Authentication.Service';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
+import { TokenService } from '../Services/token.service';
 
 @Component({
   selector: 'app-authentication',
@@ -26,112 +27,117 @@ export class Authentication {
   isLoginLoading: boolean = false;
   isRegisterLoading: boolean = false;
 
-  private apiAuthService: APIAuthenactionService = inject(APIAuthenactionService);
-  private cd: ChangeDetectorRef = inject(ChangeDetectorRef); // to refresh UI Manually
-  private router = inject(Router);
+  // ── Toast ✅ NEW ──────────────────────────────────
+  toastMessage = signal('');
+  toastVisible = signal(false);
+  toastType = signal<'success' | 'error'>('success');
 
-  constructor(){
-    this.loginModel = new LoginModel();
+  private apiAuthService  = inject(APIAuthenactionService);
+  private cd              = inject(ChangeDetectorRef);
+  private router          = inject(Router);
+  private tokenService    = inject(TokenService);
+
+  constructor() {
+    this.loginModel    = new LoginModel();
     this.registerModel = new RegisterModel();
+
+    // ✅ BACK BUTTON FIX: if a token already exists redirect away immediately
+    // so a logged-in user can never land on the login page
+    const token = this.tokenService.getToken();
+    if (token) {
+      const role = this.tokenService.getRole();
+      if (role === 'Admin') {
+        this.router.navigate(['/admin'], { replaceUrl: true });
+      } else {
+        this.router.navigate(['/dashboard'], { replaceUrl: true });
+      }
+    }
   }
 
-  login(){
+  // ── Toast helper ──────────────────────────────────
+
+  private showToast(message: string, type: 'success' | 'error' = 'success') {
+    this.toastMessage.set(message);
+    this.toastType.set(type);
+    this.toastVisible.set(true);
+
+    // Auto-hide after 2.5 seconds
+    setTimeout(() => {
+      this.toastVisible.set(false);
+    }, 2500);
+  }
+
+  // ── Login ─────────────────────────────────────────
+
+  login() {
     this.loginError = '';
     this.isLoginLoading = true;
 
     this.apiAuthService.apiLogin(this.loginModel)
-    .pipe(    // finalize() runs after the observable completes or errors.
-      finalize(() => {
-        this.isLoginLoading = false;
-        this.cd.detectChanges();
-      })
-    )
-    .subscribe({
-      next:(response:any)=>{
-        if(response){
-          sessionStorage.setItem('token',response?.token);
-          alert('Login Successful');
-          this.router.navigateByUrl('/dashboard');
+      .pipe(
+        finalize(() => {
+          this.isLoginLoading = false;
+          this.cd.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (response: any) => {
+          if (response) {
+            sessionStorage.setItem('token', response?.token);
 
+            // ✅ Toast instead of alert
+            this.showToast('Login successful! Redirecting...');
+
+            // ✅ replaceUrl: true so back button cannot return to login page
+            setTimeout(() => {
+              const role = this.tokenService.getRole();
+              if (role === 'Admin') {
+                this.router.navigate(['/admin'], { replaceUrl: true });
+              } else {
+                this.router.navigate(['/dashboard'], { replaceUrl: true });
+              }
+            }, 1000);
+          }
+        },
+        error: (error) => {
+          if (error.status === 401) {
+            this.loginError = 'Invalid username or password';
+          } else {
+            this.loginError = 'Something went wrong. Please try again.';
+          }
         }
-      },
-      error:(error)=>{
-        if(error.status === 401){
-          this.loginError = 'Invalid username or password';
-        }
-        else{
-          this.loginError = 'Something went wrong. Please try again.';
-        }
-      }
-    });
+      });
   }
 
-  // register(){
-  //   this.registerError = '';
-  //   this.isRegisterLoading = true;
+  // ── Register ──────────────────────────────────────
 
-  //   this.apiAuthService.apiRegister(this.registerModel)
-  //   .pipe(
-  //     finalize(() => {
-  //       this.isRegisterLoading = false;
-  //       this.cd.detectChanges();
-  //     })
-  //   )
-  //   .subscribe({
-  //     next:(response:any)=>{
-  //       if(response){
-  //         sessionStorage.setItem('token',response?.token);
-  //         alert('Register successful!');
-  //         this.router.navigateByUrl('')
-  //       }
-  //     },
-  //     error:(error)=>{
-  //       if(error.status === 400){
-  //         this.registerError = error.error?.message || 'Registration failed';
-  //       }
-  //       else{
-  //         this.registerError = 'Something went wrong.';
-  //       }
-  //     }
-  //   });
-  // }
+  register() {
+    this.registerError = '';
+    this.isRegisterLoading = true;
 
-  register(){
-  this.registerError = '';
-  this.loginError = '';
-  this.isRegisterLoading = true;
-
-  this.apiAuthService.apiRegister(this.registerModel)
-  .pipe(
-    finalize(() => {
-      this.isRegisterLoading = false;
-      this.cd.detectChanges();
-    })
-  )
-  .subscribe({
-    next:(response:any)=>{
-      if(response){
-        // Switch to login tab
-        this.activeTab = 'login';
-
-        // Optional: prefill username in login
-        this.loginModel.username = this.registerModel.username;
-
-        // Clear register form
-        this.registerModel = new RegisterModel();
-
-        // Show success message in login tab
-        this.loginError = 'Registration successful! Please login.';
-      }
-    },
-    error:(error)=>{
-      if(error.status === 400){
-        this.registerError = error.error?.message || 'Registration failed';
-      }
-      else{
-        this.registerError = 'Something went wrong.';
-      }
-    }
-  });
-}
+    this.apiAuthService.apiRegister(this.registerModel)
+      .pipe(
+        finalize(() => {
+          this.isRegisterLoading = false;
+          this.cd.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (response: any) => {
+          if (response) {
+            // ✅ Toast instead of alert, then redirect to login tab
+            this.showToast('Registration successful! Please log in.');
+            this.registerModel = new RegisterModel();
+            this.activeTab = 'login';
+          }
+        },
+        error: (error) => {
+          if (error.status === 400) {
+            this.registerError = error.error?.message || 'Registration failed';
+          } else {
+            this.registerError = 'Something went wrong.';
+          }
+        }
+      });
+  }
 }

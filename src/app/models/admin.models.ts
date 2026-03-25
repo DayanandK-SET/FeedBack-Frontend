@@ -24,6 +24,7 @@ export interface AdminCreatorDto {
   id: number;
   username: string;
   email: string;
+  isActive: boolean;
 }
 
 export interface AdminSurveyDto {

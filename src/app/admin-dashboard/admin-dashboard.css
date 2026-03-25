@@ -666,3 +666,248 @@ tr:hover td { background: #fafafa; }
 .btn-clear:hover {
   background: #f3f4f6;
 }
+
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Base button */
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+/* Blue (Responses) */
+.btn-blue {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.btn-blue:hover {
+  background-color: #1976d2;
+  color: white;
+}
+
+/* Purple (Analytics) */
+.btn-purple {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.btn-purple:hover {
+  background-color: #7b1fa2;
+  color: white;
+}
+
+
+/* ── Add to bottom of admin-dashboard.css ── */
+
+.inactive-avatar {
+  background: #9ca3af !important;
+}
+
+.inactive-text {
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+
+/* ── Form Inputs (for dropdown consistency) ── */
+.form-input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s;
+  background: white;
+}
+
+.form-input:focus {
+  border-color: #2563eb;
+}
+
+
+/* --------------------------------------------------- */
+/* ✅ MOBILE RESPONSIVENESS FIXES (SAFE - NO BREAKING) */
+/* --------------------------------------------------- */
+
+/* Make container fit small screens */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 12px 14px !important;
+    max-width: 100% !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  /* Tabs scrollable and not squeezed */
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Filter section stacks correctly */
+  .filter-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .btn-apply,
+  .btn-clear {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* --------------------------------------------------- */
+/* ✅ TABLE RESPONSIVENESS */
+/* --------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 650px; /* prevents column crushing */
+  }
+
+  /* Make title column truncate gracefully */
+  .title-cell {
+    max-width: 180px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Action buttons shrink spacing */
+  .action-buttons {
+    gap: 4px !important;
+  }
+  .btn-action {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
+
+/* --------------------------------------------------- */
+/* ✅ SMALL MOBILE FIXES (≤480px) */
+/* --------------------------------------------------- */
+
+@media (max-width: 480px) {
+
+  /* Email hidden already good */
+  
+  /* Reduce padding so content does not squeeze */
+  th, td {
+    padding: 10px 12px !important;
+  }
+
+  .table-row-info {
+    font-size: 12px;
+  }
+
+  .pagination {
+    gap: 4px;
+    justify-content: center;
+  }
+
+  .btn-page, .btn-page-num {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .status-badge {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  /* Prevent filter card from stretching too tall */
+  .filter-card {
+    padding: 12px;
+  }
+}
+
+
+/* ✅ Restore email column on mobile */
+@media (max-width: 480px) {
+  /* ✅ Remove any previous "hide email" rule */
+  .email-cell,
+  th:nth-child(3),
+  td:nth-child(3) {
+    display: table-cell !important;
+  }
+
+  /* ✅ Prevent column breakage */
+  .table-responsive table {
+    min-width: 720px !important; /* ensures all 4 columns fit */
+  }
+
+  /* ✅ Improve readability on mobile */
+  td,
+  th {
+    white-space: nowrap !important;
+  }
+
+  /* ✅ Username column wraps nicely if needed */
+  .username {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ✅ Email column well-behaved */
+  .email-cell {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ✅ Status column stays stable */
+  .toggle-wrapper {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .toggle-label {
+    font-size: 12px;
+  }
+}

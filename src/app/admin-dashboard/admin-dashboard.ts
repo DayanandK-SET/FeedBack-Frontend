@@ -581,12 +581,13 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../Services/admin.service';
 import { AdminCreatorDto, AdminSurveyDto, AuditLogDto } from '../models/admin.models';
 import { TokenService } from '../Services/token.service';
+import { RouterModule } from '@angular/router';
 
 type ActiveTab = 'creators' | 'surveys' | 'auditLogs';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule, DatePipe, RouterModule],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
@@ -608,6 +609,40 @@ export class AdminDashboard {
   creatorPage = 1;
   creatorPageSize = 8;
 
+  // ── Creator Filters ─────────────────────────────
+creatorIsActiveFilter: boolean | null = null;         // UI value
+appliedCreatorIsActiveFilter: boolean | null = null;  // Applied value
+
+get hasCreatorFilters(): boolean {
+  return this.appliedCreatorIsActiveFilter !== null;
+}
+
+applyCreatorFilters() {
+  this.appliedCreatorIsActiveFilter = this.creatorIsActiveFilter;
+  this.creatorPage = 1;
+}
+
+clearCreatorFilters() {
+  this.creatorIsActiveFilter = null;
+  this.appliedCreatorIsActiveFilter = null;
+  this.creatorSearch = ''; // ✅ also reset search
+  this.creatorPage = 1;
+}
+
+// UI inputs (what user types/selects)
+auditFromDateInput = '';
+auditToDateInput = '';
+auditSearchInput = '';
+
+// Applied filters (used for filtering)
+auditFromDate = '';
+auditToDate = '';
+auditLogSearch = '';
+
+
+    // ✅ Toggle state for creators
+  togglingCreatorId = signal<number | null>(null);
+
   // ── Surveys ───────────────────────────────────────
   surveys = signal<AdminSurveyDto[]>([]);
   surveysLoading = signal(true);
@@ -620,13 +655,13 @@ export class AdminDashboard {
   auditLogs = signal<AuditLogDto[]>([]);
   auditLogsLoading = signal(false);
   auditLogsError = signal('');
-  auditLogSearch = '';
+  // auditLogSearch = '';
   auditLogPage = 1;
   auditLogPageSize = 8;
 
   // ── Audit Log Date Filters ────────────────────────
-  auditFromDate = '';
-  auditToDate = '';
+  // auditFromDate = '';
+  // auditToDate = '';
 
   // ── Delete ────────────────────────────────────────
   showDeleteModal = signal(false);
@@ -705,6 +740,30 @@ export class AdminDashboard {
   get totalSurveys(): number  { return this.surveys().length; }
   get activeSurveys(): number { return this.surveys().filter(s => s.isActive).length; }
 
+  
+
+
+    // ── Toggle Creator Status ✅ NEW ──────────────────
+
+  toggleCreatorStatus(creator: AdminCreatorDto) {
+    this.togglingCreatorId.set(creator.id);
+
+    this.adminService.toggleCreatorStatus(creator.id).subscribe({
+      next: () => {
+        // Flip the isActive flag locally — no need to reload all creators
+        this.creators.update(list =>
+          list.map(c =>
+            c.id === creator.id ? { ...c, isActive: !c.isActive } : c
+          )
+        );
+        this.togglingCreatorId.set(null);
+      },
+      error: () => {
+        this.togglingCreatorId.set(null);
+      }
+    });
+  }
+
   // ── Delete Modal ──────────────────────────────────
 
   openDeleteModal(type: 'creator' | 'survey', id: number, name: string) {
@@ -758,14 +817,34 @@ export class AdminDashboard {
   // CREATORS — Search + Pagination
   // ══════════════════════════════════════════════════
 
+  // get filteredCreators(): AdminCreatorDto[] {
+  //   const q = this.creatorSearch.toLowerCase().trim();
+  //   if (!q) return this.creators();
+  //   return this.creators().filter(c =>
+  //     c.username.toLowerCase().includes(q) ||
+  //     c.email.toLowerCase().includes(q)
+  //   );
+  // }
+
   get filteredCreators(): AdminCreatorDto[] {
-    const q = this.creatorSearch.toLowerCase().trim();
-    if (!q) return this.creators();
-    return this.creators().filter(c =>
+  let list = this.creators();
+
+  // ✅ 1. Apply status filter
+  if (this.appliedCreatorIsActiveFilter !== null) {
+    list = list.filter(c => c.isActive === this.appliedCreatorIsActiveFilter);
+  }
+
+  // ✅ 2. Apply search filter
+  const q = this.creatorSearch.toLowerCase().trim();
+  if (q) {
+    list = list.filter(c =>
       c.username.toLowerCase().includes(q) ||
       c.email.toLowerCase().includes(q)
     );
   }
+
+  return list;
+}
 
   get creatorTotalPages(): number {
     return Math.max(1, Math.ceil(this.filteredCreators.length / this.creatorPageSize));
@@ -864,18 +943,40 @@ export class AdminDashboard {
     return !!(this.auditFromDate || this.auditToDate || this.auditLogSearch.trim());
   }
 
+  // applyAuditFilters() {
+  //   this.auditLogPage = 1;
+  // }
+
   applyAuditFilters() {
-    this.auditLogPage = 1;
-  }
+  this.auditFromDate = this.auditFromDateInput;
+  this.auditToDate = this.auditToDateInput;
+  this.auditLogSearch = this.auditSearchInput;
+
+  this.auditLogPage = 1;
+}
+
+  // clearAuditFilters() {
+  //   this.auditFromDate = '';
+  //   this.auditToDate = '';
+  //   this.auditLogSearch = '';
+  //   this.auditLogPage = 1;
+  // }
 
   clearAuditFilters() {
-    this.auditFromDate = '';
-    this.auditToDate = '';
-    this.auditLogSearch = '';
-    this.auditLogPage = 1;
-  }
+  this.auditFromDateInput = '';
+  this.auditToDateInput = '';
+  this.auditSearchInput = '';
+
+  this.auditFromDate = '';
+  this.auditToDate = '';
+  this.auditLogSearch = '';
+
+  this.auditLogPage = 1;
+}
 
   onAuditSearchChange() {
+      this.auditLogSearch = this.auditSearchInput;
+
     this.auditLogPage = 1;
   }
 
