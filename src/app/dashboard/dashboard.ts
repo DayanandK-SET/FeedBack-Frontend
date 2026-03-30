@@ -42,7 +42,7 @@ export class Dashboard {
   isActiveFilter: boolean | null = null;
 
   // ── Applied Filters (only update on Apply click) ──
-  // ✅ FIX: tags only show after Apply, not on dropdown change
+  // tags only show after Apply, not on dropdown change
   appliedFromDate = '';
   appliedToDate = '';
   appliedIsActiveFilter: boolean | null = null;
@@ -55,7 +55,7 @@ export class Dashboard {
   // ── Edit ──────────────────────────────────────────
   showEditModal = signal(false);
   editingSurvey = signal<CreatorSurveyListDto | null>(null);
-  // ✅ Extended to include expireAt and maxResponses
+  //include expireAt and maxResponses
   editForm: {
     title: string;
     description: string;
@@ -101,7 +101,7 @@ export class Dashboard {
     return Math.min(this.pageNumber * this.pageSize, this.totalCount());
   }
 
-  // ✅ FIX: hasActiveFilters now based on APPLIED values, not live values
+  // hasActiveFilters now based on APPLIED values, not live values
   get hasActiveFilters(): boolean {
     return !!(this.appliedFromDate || this.appliedToDate || this.appliedIsActiveFilter !== null);
   }
@@ -143,7 +143,7 @@ export class Dashboard {
   // ── Filter actions ────────────────────────────────
 
   applyFilters() {
-    // ✅ FIX: copy live values to applied values only on Apply click
+    //copy live values to applied values only on Apply click
     this.appliedFromDate = this.fromDate;
     this.appliedToDate = this.toDate;
     this.appliedIsActiveFilter = this.isActiveFilter;
@@ -255,7 +255,7 @@ export class Dashboard {
     this.editingSurvey.set(survey);
     this.editError.set('');
 
-    // ✅ Pre-populate all fields including expireAt and maxResponses
+    // Pre-populate all fields including expireAt and maxResponses
     // datetime-local input needs format "yyyy-MM-ddTHH:mm" so we slice to 16 chars
     this.editForm = {
       title: survey.title,
@@ -282,7 +282,7 @@ export class Dashboard {
     this.isEditLoading.set(true);
     this.editError.set('');
 
-    // ✅ Build the DTO — convert expireAt string back to ISO format for backend
+    // Build the DTO — convert expireAt string back to ISO format for backend
     const dto: UpdateSurveyDto = {
       title: this.editForm.title,
       description: this.editForm.description,
@@ -298,12 +298,12 @@ export class Dashboard {
           list.map(s =>
             s.surveyId === survey.surveyId
               ? {
-                  ...s,
-                  title: dto.title,
-                  description: dto.description,
-                  expireAt: dto.expireAt,
-                  maxResponses: dto.maxResponses
-                }
+                ...s,
+                title: dto.title,
+                description: dto.description,
+                expireAt: dto.expireAt,
+                maxResponses: dto.maxResponses
+              }
               : s
           )
         );
@@ -405,7 +405,7 @@ export class Dashboard {
     });
   }
 
-  // ── Download Excel Template ✅ NEW ────────────────
+  // ── Download Excel Template  ────────────────
   // Generates a sample .xlsx file using SheetJS so users
   // know exactly how to format their questions file.
   // Requires: npm install xlsx
@@ -422,8 +422,8 @@ export class Dashboard {
       ],
       // Example rows
       ['How satisfied are you with our service?', 'Rating'],
-      ['Please describe your experience',         'Text'],
-      ['Which feature do you use most?',          'MultipleChoice', 'Dashboard', 'Analytics', 'Reports']
+      ['Please describe your experience', 'Text'],
+      ['Which feature do you use most?', 'MultipleChoice', 'Dashboard', 'Analytics', 'Reports']
     ];
 
     const worksheet = XLSX.utils.aoa_to_sheet(templateRows);

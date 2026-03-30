@@ -41,7 +41,7 @@ export class Authentication {
     this.loginModel    = new LoginModel();
     this.registerModel = new RegisterModel();
 
-    // ✅ BACK BUTTON FIX: if a token already exists redirect away immediately
+    // if a token already exists redirect away immediately
     // so a logged-in user can never land on the login page
     const token = this.tokenService.getToken();
     if (token) {
@@ -54,20 +54,20 @@ export class Authentication {
     }
   }
 
-  // ── Toast helper ──────────────────────────────────
+
 
   private showToast(message: string, type: 'success' | 'error' = 'success') {
     this.toastMessage.set(message);
     this.toastType.set(type);
     this.toastVisible.set(true);
 
-    // Auto-hide after 2.5 seconds
+  
     setTimeout(() => {
       this.toastVisible.set(false);
     }, 2500);
   }
 
-  // ── Login ─────────────────────────────────────────
+  //  Login 
 
   login() {
     this.loginError = '';
@@ -85,10 +85,9 @@ export class Authentication {
           if (response) {
             sessionStorage.setItem('token', response?.token);
 
-            // ✅ Toast instead of alert
             this.showToast('Login successful! Redirecting...');
 
-            // ✅ replaceUrl: true so back button cannot return to login page
+            // true so back button cannot return to login page
             setTimeout(() => {
               const role = this.tokenService.getRole();
               if (role === 'Admin') {
@@ -109,7 +108,7 @@ export class Authentication {
       });
   }
 
-  // ── Register ──────────────────────────────────────
+  //  Register 
 
   register() {
     this.registerError = '';
@@ -125,7 +124,7 @@ export class Authentication {
       .subscribe({
         next: (response: any) => {
           if (response) {
-            // ✅ Toast instead of alert, then redirect to login tab
+
             this.showToast('Registration successful! Please log in.');
             this.registerModel = new RegisterModel();
             this.activeTab = 'login';

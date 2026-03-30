@@ -34,5 +34,5 @@ export interface SubmitAnswerDto {
 
 export interface SubmitSurveyDto {
   answers: SubmitAnswerDto[];
-  responseToken: string;   // UUID generated on client side to prevent duplicate submissions
+  responseToken: string;   // UID generated on client side to prevent duplicate submissions
 }

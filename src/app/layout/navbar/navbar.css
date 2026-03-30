@@ -101,13 +101,14 @@
 
 /* ── RESPONSIVE ──────────────────────────────────── */
 
-/* Tablet — shrink welcome text slightly */
+/* Tablet — adjust sizes but DO NOT truncate welcome text */
 @media (max-width: 900px) {
   .welcome {
     font-size: 12px;
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: none;         /* ✅ Remove truncation */
+    overflow: visible;       /* ✅ Prevent ellipsis */
+    text-overflow: unset;
+    white-space: nowrap;     /* Keep text on one line */
   }
 
   .nav-links a {
@@ -119,7 +120,9 @@
 /* Mobile — show hamburger, hide nav links */
 @media (max-width: 768px) {
 
-  .hamburger { display: block; }
+  .hamburger {
+    display: block;
+  }
 
   .nav-links {
     position: absolute;
@@ -136,7 +139,9 @@
     z-index: 999;
   }
 
-  .nav-links li { width: 100%; }
+  .nav-links li {
+    width: 100%;
+  }
 
   .nav-links a {
     display: block;
@@ -151,17 +156,33 @@
     padding-left: 21px;
   }
 
-  .nav-links.open { display: flex; }
+  .nav-links.open {
+    display: flex;
+  }
 
-  /* Still show welcome on mobile — just smaller */
+  /* ✅ FIXED: welcome text visible on mobile */
   .welcome {
     font-size: 12px;
-    max-width: 80px;
+    max-width: none;        /* ✅ Remove truncation */
+    overflow: visible; 
+    white-space: nowrap;
+  }
+
+  /* ✅ Improve mobile layout — stack welcome + logout */
+  .user-section {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;                /* smaller gap */
   }
 }
 
 /* Very small phones — hide welcome to save space */
 @media (max-width: 380px) {
-  .welcome { display: none; }
-  .navbar { padding: 12px 14px; }
+  .welcome {
+    display: none;
+  }
+  .navbar {
+    padding: 12px 14px;
+  }
 }
+
