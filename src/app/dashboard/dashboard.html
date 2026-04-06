@@ -356,7 +356,13 @@
 
       <div class="form-group">
         <label>Expiry Date <span class="hint">(optional)</span></label>
-        <input type="datetime-local" class="form-input" [(ngModel)]="importExpireAt">
+        <!-- <input type="datetime-local" class="form-input" [(ngModel)]="importExpireAt"> -->
+        <input
+  type="datetime-local"
+  class="form-input"
+  [(ngModel)]="importExpireAt"
+  [min]="minExpiryDate"
+>
         <p class="field-hint">Survey stops accepting responses after this date</p>
       </div>
 

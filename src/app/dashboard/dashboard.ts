@@ -19,6 +19,18 @@ import {
 })
 export class Dashboard {
 
+
+    minExpiryDate = '';
+
+
+  ngOnInit() {
+    const now = new Date();
+    now.setSeconds(0);
+    now.setMilliseconds(0);
+
+    this.minExpiryDate = now.toISOString().slice(0, 16);
+  }
+
   private surveyService = inject(SurveyService);
 
   // ── Data ─────────────────────────────────────────

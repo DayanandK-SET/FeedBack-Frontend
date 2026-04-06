@@ -25,6 +25,19 @@ interface QuestionForm {
 })
 export class CreateSurvey {
 
+  minExpiryDate = '';
+
+
+  ngOnInit() {
+    const now = new Date();
+    now.setSeconds(0);
+    now.setMilliseconds(0);
+
+    this.minExpiryDate = now.toISOString().slice(0, 16);
+  }
+
+
+
   private surveyService = inject(SurveyService);
   private questionBankService = inject(QuestionBankService);
   private router = inject(Router);
@@ -37,6 +50,9 @@ export class CreateSurvey {
   description = '';
   expireAt = '';
   maxResponses: number | null = null;
+
+
+
 
   //  Questions 
   questions = signal<QuestionForm[]>([]);

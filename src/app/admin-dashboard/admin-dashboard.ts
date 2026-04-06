@@ -241,7 +241,7 @@ export class AdminDashboard {
   }
 
   // ══════════════════════════════════════════════════
-  // AUDIT LOGS — unchanged, frontend filtering kept
+  // AUDIT LOGS — unchanged, frontend filtering
   // ══════════════════════════════════════════════════
 
   loadAuditLogs() {
